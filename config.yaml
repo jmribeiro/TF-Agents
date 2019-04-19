@@ -1,0 +1,14 @@
+environment: 'CartPole-v0'
+
+episodes: 20000
+render: False
+
+layers:
+  - 64
+
+learning rate: 0.0001
+batch size: 64
+replay buffer size: 100000
+
+evaluation episodes: 10
+evaluation interval: 1000
