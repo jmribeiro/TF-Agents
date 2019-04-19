@@ -1,0 +1,9 @@
+matplotlib
+pyyaml
+gym==0.10.11
+imageio
+PILLOW
+pyglet
+pyvirtualdisplay
+tf-agents-nightly
+tf-nightly
