@@ -1,9 +1,6 @@
-import yaml
-
 import matplotlib.pyplot as plt
-
 import tensorflow as tf
-
+import yaml
 from tf_agents.agents.dqn import dqn_agent
 from tf_agents.environments import suite_gym
 from tf_agents.environments import tf_py_environment
@@ -22,7 +19,6 @@ def setup_environments(env_name):
 
 
 def setup_qnetwork_agent(time_step_spec, observation_spec, action_spec, layers, learning_rate):
-
     network = q_network.QNetwork(observation_spec, action_spec, fc_layer_params=layers)
     optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate)
     train_step_counter = tf.compat.v2.Variable(0)
@@ -58,7 +54,6 @@ def interact(env, pi, replay_buffer, render):
 
 
 def evaluate_policy(env, pi, num_episodes):
-
     total_return = 0.0
     for _ in range(num_episodes):
         time_step = env.reset()
@@ -74,8 +69,8 @@ def evaluate_policy(env, pi, num_episodes):
     return avg_return.numpy()[0]
 
 
-def train(timesteps, agent, replay_buffer, iterator, batch_size, train_env, eval_env, eval_interval, eval_episodes, render):
-
+def train(timesteps, agent, replay_buffer, iterator, batch_size, train_env, eval_env, eval_interval, eval_episodes,
+          render):
     # (Optional) Optimize by wrapping some of the code in a graph using TF function.
     agent.train = common.function(agent.train)
 
@@ -116,23 +111,17 @@ def plot_run(num_episodes, eval_interval, returns):
 
 
 if __name__ == '__main__':
-
-    #Configuration Reading
-
+    # Configuration Reading
     with open("config.yaml", "r") as stream:
         config = yaml.load(stream, Loader=yaml.SafeLoader)
-
     episodes = config["episodes"]
     env_name = config["environment"]
     evaluation_interval = config["evaluation interval"]
     evaluation_episodes = config["evaluation episodes"]
-
     layers = [int(layer) for layer in config["layers"]]
-
     learning_rate = config["learning rate"]
     replay_buffer_size = config["replay buffer size"]
     replay_batch_size = config["batch size"]
-
     render = config["render"]
 
     # Environment
@@ -140,9 +129,9 @@ if __name__ == '__main__':
 
     # Agent
     agent = setup_qnetwork_agent(train_env.time_step_spec(),
-                        train_env.observation_spec(),
-                        train_env.action_spec(),
-                        layers, learning_rate)
+                                 train_env.observation_spec(),
+                                 train_env.action_spec(),
+                                 layers, learning_rate)
 
     # Train and Evaluate
     returns = train(
