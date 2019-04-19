@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 from tf_agents.agents.dqn import dqn_agent
-from tf_agents.agents.dqn import q_network
 from tf_agents.environments import suite_gym
 from tf_agents.environments import tf_py_environment
-from tf_agents.environments import trajectory
+from tf_agents.networks import q_network
 from tf_agents.replay_buffers import tf_uniform_replay_buffer
+from tf_agents.trajectories import trajectory
 from tf_agents.utils import common
 
 tf.compat.v1.enable_v2_behavior()
@@ -21,11 +21,7 @@ def setup_environments(env_name):
     return train_env, eval_env
 
 
-def setup_agent(env, layers, learning_rate):
-
-    time_step_spec = env.time_step_spec()
-    observation_spec = env.observation_spec()
-    action_spec = env.action_spec()
+def setup_qnetwork_agent(time_step_spec, observation_spec, action_spec, layers, learning_rate):
 
     network = q_network.QNetwork(observation_spec, action_spec, fc_layer_params=layers)
     optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate)
@@ -35,7 +31,20 @@ def setup_agent(env, layers, learning_rate):
                                td_errors_loss_fn=dqn_agent.element_wise_squared_loss)
     agent.initialize()
 
+    replay_buffer, iterator = setup_replay_buffer(replay_buffer_size,
+                                                  replay_batch_size,
+                                                  agent.collect_data_spec, train_env.batch_size)
+    agent.replay_buffer = replay_buffer
+    agent.iterator = iterator
+
     return agent
+
+
+def setup_replay_buffer(max_size, replay_batch_size, data_spec, data_batch_size):
+    replay_buffer = tf_uniform_replay_buffer.TFUniformReplayBuffer(data_spec, data_batch_size, max_size)
+    dataset = replay_buffer.as_dataset(replay_batch_size, num_steps=2, num_parallel_calls=3).prefetch(3)
+    iterator = iter(dataset)
+    return replay_buffer, iterator
 
 
 def interact(env, pi, replay_buffer, render):
@@ -48,15 +57,7 @@ def interact(env, pi, replay_buffer, render):
         env.pyenv.envs[0].render()
 
 
-def setup_replay_buffer(max_size, agent, batch_size):
-    data_spec = agent.collect_data_spec
-    replay_buffer = tf_uniform_replay_buffer.TFUniformReplayBuffer(data_spec, batch_size, max_size)
-    dataset = replay_buffer.as_dataset(batch_size, num_steps=2, num_parallel_calls=3).prefetch(3)
-    iterator = iter(dataset)
-    return replay_buffer, iterator
-
-
-def evaluate_policy(env, pi, num_episodes=10):
+def evaluate_policy(env, pi, num_episodes):
 
     total_return = 0.0
     for _ in range(num_episodes):
@@ -114,30 +115,47 @@ def plot_run(num_episodes, eval_interval, returns):
     return plt
 
 
-def main():
+if __name__ == '__main__':
+
+    #Configuration Reading
 
     with open("config.yaml", "r") as stream:
-        config = yaml.load(stream)
+        config = yaml.load(stream, Loader=yaml.SafeLoader)
 
-    train_env, eval_env = setup_environments(config["environment"])
-    agent = setup_agent(train_env, [int(layer) for layer in config["layers"]], config["learning rate"])
-    replay_buffer, iterator = setup_replay_buffer(config["replay buffer size"], agent, config["batch size"])
+    episodes = config["episodes"]
+    env_name = config["environment"]
+    evaluation_interval = config["evaluation interval"]
+    evaluation_episodes = config["evaluation episodes"]
 
+    layers = [int(layer) for layer in config["layers"]]
+
+    learning_rate = config["learning rate"]
+    replay_buffer_size = config["replay buffer size"]
+    replay_batch_size = config["batch size"]
+
+    render = config["render"]
+
+    # Environment
+    train_env, eval_env = setup_environments(env_name)
+
+    # Agent
+    agent = setup_qnetwork_agent(train_env.time_step_spec(),
+                        train_env.observation_spec(),
+                        train_env.action_spec(),
+                        layers, learning_rate)
+
+    # Train and Evaluate
     returns = train(
-        config["episodes"],
+        episodes,
         agent,
-        replay_buffer,
-        iterator,
-        config["batch size"],
+        agent.replay_buffer,
+        agent.iterator,
+        replay_batch_size,
         train_env,
         eval_env,
-        config["evaluation interval"],
-        config["evaluation episodes"],
-        config["render"]
+        evaluation_interval,
+        evaluation_episodes,
+        render
     )
 
     print(returns)
-
-
-if __name__ == '__main__':
-    main()
