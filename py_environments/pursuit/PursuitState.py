@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from environments.pursuit.utils import cornered, distance, directionx, directiony
+from py_environments.pursuit.utils import cornered, distance, directionx, directiony
 
 
 class PursuitState(object):

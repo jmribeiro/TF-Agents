@@ -5,13 +5,14 @@ from tf_agents.environments.py_environment import PyEnvironment
 from tf_agents.specs import BoundedArraySpec
 from tf_agents.trajectories import time_step as ts
 
-from environments.pursuit.PursuitState import PursuitState
-from environments.pursuit.PyGameVisualizer import PygameVisualizer
-from environments.pursuit.agents.DummyAgent import DummyAgent
-from environments.pursuit.agents.GreedyAgent import GreedyAgent
-from environments.pursuit.agents.ProbabilisticDestinations import ProbabilisticDestinationsAgent
-from environments.pursuit.agents.TeammateAwareAgent import TeammateAwareAgent
-from environments.pursuit.utils import action_pool, move
+from py_environments.pursuit.PursuitState import PursuitState
+from py_environments.pursuit.PyGameVisualizer import PygameVisualizer
+from py_environments.pursuit.agents.DummyAgent import DummyAgent
+from py_environments.pursuit.agents.GreedyAgent import GreedyAgent
+from py_environments.pursuit.agents.ProbabilisticDestinations import ProbabilisticDestinationsAgent
+from py_environments.pursuit.agents.TeammateAwareAgent import TeammateAwareAgent
+from py_environments.pursuit.utils import action_pool, move
+from py_environments.utils import validate_environment
 
 
 class PursuitEnv(PyEnvironment):
@@ -59,8 +60,6 @@ class PursuitEnv(PyEnvironment):
         next_state = self._transition_function(self._state, joint_actions)
         self._reward = PursuitEnv._reward_function(next_state)
         self._terminal = next_state.terminal
-        for teammate in self.teammates:
-            teammate.feedback(self._state, joint_actions, self._reward, next_state, self._terminal)
         self._state = next_state
 
         observation = PursuitEnv._state_positions(self._state)
@@ -181,3 +180,7 @@ class PursuitEnv(PyEnvironment):
     @staticmethod
     def _relative_state_positions(state, agent_idx):
         return state.features_relative_agent(agent_idx).astype("int32")
+
+    @staticmethod
+    def validate():
+        validate_environment(PursuitEnv())

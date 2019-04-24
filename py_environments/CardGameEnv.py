@@ -3,13 +3,19 @@ from tf_agents.environments.py_environment import PyEnvironment
 from tf_agents.specs import BoundedArraySpec
 from tf_agents.trajectories import time_step as ts
 
+from py_environments.utils import validate_environment
+
 
 class CardGameEnv(PyEnvironment):
+
+    """
+    CardGameEnv from https://github.com/tensorflow/agents colab tutorials
+    """
 
     def __init__(self):
         super().__init__()
         self._action_spec = BoundedArraySpec(
-            shape=(), dtype=np.int32, minimum=0, maximum=1, name='action')
+            shape=(1,), dtype=np.int32, minimum=0, maximum=1, name='action')
         self._observation_spec = BoundedArraySpec(
             shape=(1,), dtype=np.int32, minimum=0, name='observation')
         self._state = 0
@@ -49,8 +55,6 @@ class CardGameEnv(PyEnvironment):
             return ts.transition(
                 np.array([self._state], dtype=np.int32), reward=0.0, discount=1.0)
 
-
-def validate():
-    from tf_agents.environments import utils
-    environment = CardGameEnv()
-    utils.validate_py_environment(environment, episodes=5)
+    @staticmethod
+    def validate():
+        validate_environment(CardGameEnv())

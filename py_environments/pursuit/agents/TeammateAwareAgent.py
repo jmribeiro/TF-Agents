@@ -1,24 +1,15 @@
 import numpy as np
 
-from environments.pursuit.agents.Agent import Agent
-from environments.pursuit.agents.decisionmaking.astar import astar
-from environments.pursuit.utils \
+from py_environments.pursuit.agents.HandcodedAgent import HandcodedAgent
+from py_environments.pursuit.agents.decisionmaking.astar import astar
+from py_environments.pursuit.utils \
     import distance, direction, move, cornered, action_pool, total_actions, argmin, argmax
 
 
-class TeammateAwareAgent(Agent):
-
-    def feedback(self, state, actions, reward, next_state, terminal):
-        pass
-
-    def save(self, directory):
-        pass
-
-    def load(self, directory):
-        pass
+class TeammateAwareAgent(HandcodedAgent):
 
     def __init__(self, id):
-        super().__init__("teammate aware", id, True)
+        super().__init__("teammate aware", id)
         self.last_prey_pos = None
         self.prey_id = None
         self.last_target = None
@@ -67,18 +58,13 @@ class TeammateAwareAgent(Agent):
 
         self.prey_id = prey_id
         self.last_prey_pos = state.prey_positions[self.prey_id]
-        # get the 4 agents closest to the prey
-        # agents = sorted(state.agent_positions, key=lambda p: sum(distance(p, closest_prey, w, h)))
-        # agents = agents[:4]
+
         agents = state.agent_positions
 
         # sort the agents by the worst shortest distance to the prey
         neighboring = [move(closest_prey, d, (w, h)) for d in actions]
         distances = [[sum(distance(a, p, w, h)) for p in neighboring] for a in agents]
-        # distances = [(sorted((astar_distance(p, n, state.occupied_cells, (w, h)), i) for i, n in enumerate(neighboring)), j) for j, p in enumerate(agents)]
 
-        # distances[i][j] is the distance of agent i to cell j
-        # taken = set()
         target = 0
         for _ in range(len(agents)):
             min_dists = [min(d) for d in distances]

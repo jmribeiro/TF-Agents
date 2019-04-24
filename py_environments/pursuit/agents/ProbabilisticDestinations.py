@@ -1,22 +1,13 @@
 import numpy as np
 
-from environments.pursuit.agents.Agent import Agent
-from environments.pursuit.utils import direction, move, action_pool, total_actions, manhattan_distance, softmax
+from py_environments.pursuit.agents.HandcodedAgent import HandcodedAgent
+from py_environments.pursuit.utils import direction, move, action_pool, total_actions, manhattan_distance, softmax
 
 
-class ProbabilisticDestinationsAgent(Agent):
+class ProbabilisticDestinationsAgent(HandcodedAgent):
 
     def __init__(self, idx):
-        super().__init__("probabilistic destinations", idx, True)
-
-    def feedback(self, state, actions, reward, next_state, terminal):
-        pass
-
-    def save(self, directory):
-        pass
-
-    def load(self, directory):
-        pass
+        super().__init__("probabilistic destinations", idx)
 
     def act(self, state):
         actions = action_pool()

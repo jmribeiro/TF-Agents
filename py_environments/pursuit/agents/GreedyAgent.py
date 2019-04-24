@@ -1,23 +1,14 @@
 import numpy as np
 
-from environments.pursuit.agents.Agent import Agent
-from environments.pursuit.utils import distance, direction, directionx, directiony, move, cornered, action_pool, \
+from py_environments.pursuit.agents.HandcodedAgent import HandcodedAgent
+from py_environments.pursuit.utils import distance, direction, directionx, directiony, move, cornered, action_pool, \
     total_actions
 
 
-class GreedyAgent(Agent):
-
-    def feedback(self, state, actions, reward, next_state, terminal):
-        pass
-
-    def save(self, directory):
-        pass
-
-    def load(self, directory):
-        pass
+class GreedyAgent(HandcodedAgent):
 
     def __init__(self, idx):
-        super().__init__("greedy", idx, True)
+        super().__init__("greedy", idx)
 
     def act(self, state):
         A = total_actions()

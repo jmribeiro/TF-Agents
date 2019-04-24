@@ -6,6 +6,7 @@ pyglet
 pyvirtualdisplay
 tf-agents-nightly
 tf-nightly
+tfp-nightly
 
 matplotlib
 
