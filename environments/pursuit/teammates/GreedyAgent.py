@@ -1,7 +1,7 @@
 import numpy as np
 
-from py_environments.pursuit.agents.HandcodedAgent import HandcodedAgent
-from py_environments.pursuit.utils import distance, direction, directionx, directiony, move, cornered, action_pool, \
+from environments.pursuit.teammates.HandcodedAgent import HandcodedAgent
+from environments.pursuit.utils import distance, direction, directionx, directiony, move, cornered, action_pool, \
     total_actions
 
 

@@ -1,8 +1,8 @@
 import numpy as np
 
-from py_environments.pursuit.agents.HandcodedAgent import HandcodedAgent
-from py_environments.pursuit.agents.decisionmaking.astar import astar
-from py_environments.pursuit.utils \
+from environments.pursuit.teammates.HandcodedAgent import HandcodedAgent
+from environments.pursuit.teammates.search.astar import astar
+from environments.pursuit.utils \
     import distance, direction, move, cornered, action_pool, total_actions, argmin, argmax
 
 

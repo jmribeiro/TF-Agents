@@ -1,7 +1,7 @@
 import numpy as np
 
-from py_environments.pursuit.agents.HandcodedAgent import HandcodedAgent
-from py_environments.pursuit.utils import direction, move, action_pool, total_actions, manhattan_distance, softmax
+from environments.pursuit.teammates.HandcodedAgent import HandcodedAgent
+from environments.pursuit.utils import direction, move, action_pool, total_actions, manhattan_distance, softmax
 
 
 class ProbabilisticDestinationsAgent(HandcodedAgent):

@@ -1,7 +1,7 @@
 import random
 
-from py_environments.pursuit.agents.HandcodedAgent import HandcodedAgent
-from py_environments.pursuit.utils import action_pool
+from environments.pursuit.teammates.HandcodedAgent import HandcodedAgent
+from environments.pursuit.utils import action_pool
 
 
 class DummyAgent(HandcodedAgent):

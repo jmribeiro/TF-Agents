@@ -5,10 +5,10 @@ from tf_agents.networks.q_network import QNetwork
 from tf_agents.replay_buffers.tf_uniform_replay_buffer import TFUniformReplayBuffer
 
 
-class ReplayDqnAgent(DqnAgent):
+class ReplayDQNAgent(DqnAgent):
 
     def __init__(self, time_step_spec, observation_spec, action_spec,
-                 replay_memory_size, replay_memory_batch_size, data_batch_size,
+                 replay_memory_size, replay_memory_batch_size, env_batch_size,
                  q_network_layers=(64,), alpha=0.0001, gamma=1.0,
                  epsilon_greedy=0.1, boltzmann_temperature=None):
 
@@ -25,7 +25,7 @@ class ReplayDqnAgent(DqnAgent):
 
         self.replay_memory_size = replay_memory_size
         self.replay_memory_batch_size = replay_memory_batch_size
-        self.data_batch_size = data_batch_size
+        self.env_batch_size = env_batch_size
 
         self._initialize()
 
@@ -34,11 +34,11 @@ class ReplayDqnAgent(DqnAgent):
         self._initialize_replay_memory()
 
     def _initialize_replay_memory(self):
-        self.replay_buffer = TFUniformReplayBuffer(self.collect_data_spec, self.data_batch_size, self.replay_memory_size)
+        self.replay_buffer = TFUniformReplayBuffer(self.collect_data_spec, self.env_batch_size, self.replay_memory_size)
         dataset = self.replay_buffer.as_dataset(self.replay_memory_batch_size,
                                                 num_steps=2, num_parallel_calls=3).prefetch(3)
         self.replay_memory_iterator = iter(dataset)
 
-    def feedback(self, datapoint):
+    def reinforce(self, datapoint):
         replay_buffer = self.replay_buffer
         replay_buffer.add_batch(datapoint)

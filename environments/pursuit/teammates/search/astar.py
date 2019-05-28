@@ -1,6 +1,6 @@
 from heapq import *
 
-from py_environments.pursuit.utils import neighbors, distance, direction
+from environments.pursuit.utils import neighbors, distance, direction
 
 
 class Node(object):

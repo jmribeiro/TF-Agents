@@ -4,7 +4,6 @@ timesteps: 200
 evaluation interval: 50
 evaluation episodes: 10
 
-
 render: False
 
 layers:

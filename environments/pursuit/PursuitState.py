@@ -2,10 +2,11 @@ import random
 
 import numpy as np
 
-from py_environments.pursuit.utils import cornered, distance, directionx, directiony
+from environments.pursuit.utils import cornered, distance, directionx, directiony
 
 
 class PursuitState(object):
+
     def __init__(self, agent_positions, prey_positions, world_size):
         assert (isinstance(agent_positions, tuple))
         assert (isinstance(prey_positions, tuple))
@@ -77,20 +78,6 @@ class PursuitState(object):
         agent_positions = tuple(tuple(pos) for pos in agent_positions)
         return PursuitState(agent_positions=agent_positions, prey_positions=(mid,), world_size=world_size)
 
-    def __repr__(self):
-        s = "Agents:\n" + '\n'.join(str(p) for p in self.agent_positions)
-        s += "\n\n"
-        s += "Prey:\n" + '\n'.join(str(p) for p in self.prey_positions)
-        return s
-
-    def __hash__(self):
-        return hash(self.agent_positions)
-
-    def __eq__(self, other):
-        return self.agent_positions == other.agent_positions and \
-               self.prey_positions == other.prey_positions and \
-               self.world_size == other.world_size
-
     def features(self):
         return np.concatenate((np.array(self.agent_positions), np.array(self.prey_positions))).reshape(-1)
 
@@ -127,11 +114,37 @@ class PursuitState(object):
 
         return np.concatenate(feature_array)
 
-    def distance_to(self, pivot, other, w, h):
+    @staticmethod
+    def distance_to(pivot, other, w, h):
         dx, dy = distance(pivot, other, w, h)
         dx = dx * directionx(pivot, other, w)
         dy = dy * directiony(pivot, other, h)
         return np.array([dx, dy])
+
+    def __repr__(self):
+        s = "Agents: " + ', '.join(str(p) for p in self.agent_positions)
+        s += "\n"
+        s += "Prey:" + ', '.join(str(p) for p in self.prey_positions)
+        return s
+
+    def __hash__(self):
+        return hash(self.agent_positions + self.prey_positions)
+
+    def __eq__(self, other):
+        return self.agent_positions == other.agent_positions and \
+               self.prey_positions == other.prey_positions and \
+               self.world_size == other.world_size
+
+    def __add__(self, offsets):
+        assert (isinstance(offsets, np.ndarray))
+        features = self.features()
+        F = len(features)
+        rows = self.world_size[0]
+        columns = self.world_size[1]
+        return PursuitState.from_features((features + offsets) % ([rows, columns] * (F // 2)), self.world_size)
+
+    def __radd__(self, other):
+        return self.__add__(other)
 
     def __sub__(self, other):
         assert (isinstance(other, PursuitState))
@@ -139,12 +152,3 @@ class PursuitState(object):
         max_list = [self.world_size[0], self.world_size[1]] * (len(features) // 2)
         half_list = [value // 2 for value in max_list]
         return ((features - other.features()) + half_list) % max_list - half_list
-
-    def __add__(self, other):
-        assert (isinstance(other, np.ndarray))
-        features = self.features()
-        return PursuitState.from_features(
-            (features + other) % ([self.world_size[0], self.world_size[1]] * (len(features) // 2)), self.world_size)
-
-    def __radd__(self, other):
-        return self.__add__(other)

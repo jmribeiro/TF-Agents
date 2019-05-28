@@ -3,8 +3,6 @@ from tf_agents.environments.py_environment import PyEnvironment
 from tf_agents.specs import BoundedArraySpec
 from tf_agents.trajectories import time_step as ts
 
-from py_environments.utils import validate_environment
-
 
 class CardGameEnv(PyEnvironment):
 
@@ -54,7 +52,3 @@ class CardGameEnv(PyEnvironment):
         else:
             return ts.transition(
                 np.array([self._state], dtype=np.int32), reward=0.0, discount=1.0)
-
-    @staticmethod
-    def validate():
-        validate_environment(CardGameEnv())

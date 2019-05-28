@@ -5,14 +5,13 @@ from tf_agents.environments.py_environment import PyEnvironment
 from tf_agents.specs import BoundedArraySpec
 from tf_agents.trajectories import time_step as ts
 
-from py_environments.pursuit.PursuitState import PursuitState
-from py_environments.pursuit.PyGameVisualizer import PygameVisualizer
-from py_environments.pursuit.agents.DummyAgent import DummyAgent
-from py_environments.pursuit.agents.GreedyAgent import GreedyAgent
-from py_environments.pursuit.agents.ProbabilisticDestinations import ProbabilisticDestinationsAgent
-from py_environments.pursuit.agents.TeammateAwareAgent import TeammateAwareAgent
-from py_environments.pursuit.utils import action_pool, move
-from py_environments.utils import validate_environment
+from environments.pursuit.PursuitState import PursuitState
+from environments.pursuit.PyGameVisualizer import PygameVisualizer
+from environments.pursuit.teammates.DummyAgent import DummyAgent
+from environments.pursuit.teammates.GreedyAgent import GreedyAgent
+from environments.pursuit.teammates.ProbabilisticDestinations import ProbabilisticDestinationsAgent
+from environments.pursuit.teammates.TeammateAwareAgent import TeammateAwareAgent
+from environments.pursuit.utils import action_pool, move
 
 
 class PursuitEnv(PyEnvironment):
@@ -62,7 +61,7 @@ class PursuitEnv(PyEnvironment):
         self._terminal = next_state.terminal
         self._state = next_state
 
-        observation = PursuitEnv._state_positions(self._state)
+        observation = PursuitEnv._distances_to_prey(self._state)
         if self._terminal:
             return ts.termination(observation, self._reward)
         else:
@@ -72,7 +71,7 @@ class PursuitEnv(PyEnvironment):
         self._state = PursuitState.random_state(self.total_agents, self.world_size, random.Random(100))
         self._initial = True
         self._terminal = False
-        observation = PursuitEnv._state_positions(self._state)
+        observation = PursuitEnv._distances_to_prey(self._state)
         return ts.restart(observation)
 
     def render(self, mode='rgb_array'):
@@ -144,7 +143,7 @@ class PursuitEnv(PyEnvironment):
     ##################
 
     @staticmethod
-    def _spawn_agent(agent_type, idx):
+    def _spawn_teammate(agent_type, idx):
         if agent_type == "dummy":
             agent = DummyAgent(idx)
         elif agent_type == "greedy":
@@ -167,20 +166,20 @@ class PursuitEnv(PyEnvironment):
             teammates = ["teammate aware", "teammate aware", "teammate aware"]
         else:
             raise ValueError(f"Unknown team {team}\nAvailable Teams are 'mixed', 'greedy' and 'teammate aware'")
-        return [PursuitEnv._spawn_agent(teammate, idx + 1) for idx, teammate in enumerate(teammates)]
+        return [PursuitEnv._spawn_teammate(teammate, idx + 1) for idx, teammate in enumerate(teammates)]
 
     @staticmethod
     def _reward_function(state):
         return 100 if state.terminal else -1
 
     @staticmethod
-    def _state_positions(state):
+    def _coordinates(state):
+        return state.features().astype("int32")
+
+    @staticmethod
+    def _distances_to_prey(state):
         return state.features_relative_prey().astype("int32")
 
     @staticmethod
-    def _relative_state_positions(state, agent_idx):
+    def _distances_to_agent(state, agent_idx):
         return state.features_relative_agent(agent_idx).astype("int32")
-
-    @staticmethod
-    def validate():
-        validate_environment(PursuitEnv())
